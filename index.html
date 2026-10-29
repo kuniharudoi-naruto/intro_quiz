@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>情報活用能力 体験問題（教育工学 第6回）</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1c1c1c; --muted:#5f6670; --line:#d3d8de; --panel:#f3f5f7;
+  --accent:#1f3a5f; --accent-fg:#ffffff; --ok:#1d7a5a; --bad:#b03a2e; --sel:#e3edf9;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181c; --fg:#eceff2; --muted:#9aa3ad; --line:#343b44; --panel:#1d2227;
+    --accent:#8fb4e8; --accent-fg:#0f1722; --ok:#5cc9a0; --bad:#f08a7e; --sel:#27384f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181c; --fg:#eceff2; --muted:#9aa3ad; --line:#343b44; --panel:#1d2227;
+  --accent:#8fb4e8; --accent-fg:#0f1722; --ok:#5cc9a0; --bad:#f08a7e; --sel:#27384f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:19px/1.6 "Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+#app{max-width:980px;margin:0 auto;padding:18px 16px 48px}
+h1{font-size:1.3rem;margin:0 0 2px;color:var(--accent)}
+.sub{color:var(--muted);font-size:.8rem;margin:0 0 12px}
+.progress{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.pbtn{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--panel);color:var(--fg);
+  border-radius:999px;padding:8px 16px;min-height:40px;cursor:pointer}
+.pbtn[aria-current="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.pbtn.done::after{content:" ✓"}
+.pbtn:disabled{opacity:.45}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--bg);margin:0 0 16px}
+.tag{display:inline-block;font-size:.7rem;border:1px solid var(--line);border-radius:6px;padding:0 8px;color:var(--muted);margin-left:8px;vertical-align:middle}
+.qno{font-size:.8rem;color:var(--muted);margin:0}
+.prompt{font-size:1rem;font-weight:600;margin:4px 0 12px}
+.opts{display:grid;gap:10px;margin:14px 0}
+.opt{font:inherit;font-size:.95rem;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--fg);
+  border-radius:10px;padding:10px 14px;min-height:48px;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--sel)}
+.opt.right{border-color:var(--ok)} .opt.wrong{border-color:var(--bad)}
+.opt:disabled{cursor:default;opacity:.95}
+.go{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-fg);border:0;border-radius:10px;padding:12px 24px;min-height:48px;cursor:pointer}
+.go:disabled{opacity:.45;cursor:default}
+.ghost{font:inherit;font-size:.85rem;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 14px;min-height:40px;cursor:pointer}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.msg{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.fb{border-left:5px solid var(--line);background:var(--panel);padding:10px 14px;margin:14px 0 0;border-radius:6px;font-size:.95rem}
+.fb.ok{border-left-color:var(--ok)} .fb.ng{border-left-color:var(--bad)}
+.fb b{font-size:1.05rem}
+.nat{border-collapse:collapse;font-size:.8rem;margin:10px 0 0;width:100%}
+.nat th,.nat td{border:1px solid var(--line);padding:4px 8px;text-align:center}
+.nat th{background:var(--panel);font-weight:600}
+.note{font-size:.78rem;color:var(--muted);margin:6px 0 0}
+
+/* 問1：ウェブページ（見た目は固定の配色） */
+.web{border:1px solid #8a9199;border-radius:8px;overflow:hidden;background:#fff;color:#222;margin:0 0 8px}
+.wbar{display:flex;gap:8px;align-items:center;background:#e4e7ea;padding:6px 10px;border-bottom:1px solid #b9bec4}
+.wbar .nav{color:#8a9199;font-size:.8rem}
+.wbar .url{flex:1;background:#fff;border:1px solid #b9bec4;border-radius:4px;font-size:.78rem;padding:2px 8px;color:#333;overflow-wrap:anywhere}
+.wbody{background:linear-gradient(#d9f1fb,#a9d9ef);padding:12px}
+.whead{background:#2f5d0a;border-bottom:4px solid #7fc31c;color:#ffb400;font-weight:700;padding:8px 12px;font-size:1rem}
+.wmain{background:#fff;border:1px solid #7fc31c;padding:12px 14px;font-size:.88rem;line-height:1.7}
+.wmain p{margin:0 0 .7em}
+.wmain ul{list-style:none;margin:0;padding:0}
+.wmain li::before{content:"▶ ";color:#27a2d6;font-size:.7rem}
+.wlink{font:inherit;background:none;border:0;color:#1a5fb4;text-decoration:underline;cursor:pointer;padding:6px 0;min-height:36px;text-align:left}
+.wh2{border-left:4px solid #2f5d0a;padding:4px 10px;font-weight:700;margin:0 0 .8em;background:#f6f6f6}
+.wback{display:block;margin:10px auto 0;font:inherit;font-size:.85rem;padding:6px 22px;border:1px solid #9aa0a6;border-radius:6px;background:#eee;color:#333;cursor:pointer;min-height:40px}
+
+/* 問2：フローチャート */
+.fsvg{width:100%;height:auto;max-width:640px;display:block;margin:0 auto}
+.fsvg .ln{stroke:var(--fg);stroke-width:2;fill:none}
+.fsvg .shape{fill:var(--bg);stroke:var(--accent);stroke-width:2}
+.fsvg text{fill:var(--fg);font-size:21px;font-family:inherit}
+.fsvg .lbl{font-size:19px;fill:var(--muted)}
+.fsvg .slot rect{fill:var(--panel);stroke:var(--muted);stroke-width:2;stroke-dasharray:6 4;cursor:pointer}
+.fsvg .slot.put rect{fill:var(--sel);stroke:var(--accent);stroke-dasharray:none}
+.fsvg .slot.ok rect{stroke:var(--ok);stroke-dasharray:none;stroke-width:3}
+.fsvg .slot.ng rect{stroke:var(--bad);stroke-dasharray:none;stroke-width:3}
+.fsvg .slot:focus{outline:none}
+.fsvg .slot:focus rect{stroke:var(--accent);stroke-width:3}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(14em,1fr));gap:10px;margin:12px 0}
+.cardbtn{font:inherit;font-size:.9rem;border:2px solid var(--accent);background:var(--sel);color:var(--fg);border-radius:8px;padding:10px;min-height:48px;cursor:grab}
+.cardbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.cardbtn.used{opacity:.45}
+.cardbtn:disabled{cursor:default}
+
+/* 問3：フォルダ */
+.explorer{border:1px solid #8a9199;border-radius:8px;overflow:hidden;background:#fff;color:#222;margin:0 0 8px}
+.etitle{background:#1a73c8;color:#fff;padding:6px 12px;font-size:.85rem}
+.eaddr{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid #d6d9dc;font-size:.85rem}
+.eaddr .path{flex:1;border:1px solid #c5c9cd;border-radius:4px;padding:3px 8px;overflow-wrap:anywhere}
+.eup{font:inherit;font-size:.8rem;border:1px solid #c5c9cd;background:#f1f3f4;color:#222;border-radius:4px;padding:4px 10px;min-height:34px;cursor:pointer}
+.ebody{display:grid;grid-template-columns:minmax(10em,38%) 1fr;min-height:220px}
+.etree{border-right:1px solid #d6d9dc;padding:6px 4px;font-size:.88rem;overflow:auto}
+.erow{display:flex;align-items:center}
+.echev{font:inherit;width:28px;min-height:34px;border:0;background:none;color:#1a73c8;cursor:pointer;padding:0}
+.efolder{font:inherit;font-size:.88rem;border:0;background:none;color:#222;cursor:pointer;padding:4px 6px;min-height:34px;text-align:left;border-radius:4px}
+.efolder.cur{background:#cfe6fb}
+.epane{padding:10px;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+.eicon{font:inherit;font-size:.82rem;border:0;background:none;color:#222;width:84px;padding:6px 2px;cursor:pointer;border-radius:6px;min-height:76px}
+.eicon span{display:block;font-size:2rem;line-height:1.1}
+.eicon:hover{background:#eef4fb}
+.efolder:disabled,.eicon:disabled,.echev:disabled,.eup:disabled{cursor:default}
+.photo{border:1px dashed var(--line);border-radius:8px;background:var(--panel);color:var(--muted);text-align:center;padding:18px 8px;font-size:.85rem;margin:0 0 10px}
+
+/* 入力 */
+.passage{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:10px 14px;font-size:.95rem;margin:10px 0}
+.tyin{width:100%;box-sizing:border-box;min-height:9em;font:inherit;font-size:18px;border:2px solid var(--line);border-radius:8px;padding:10px;background:var(--bg);color:var(--fg)}
+.timer{font-size:2rem;font-weight:700;color:var(--accent)}
+.res{display:grid;grid-template-columns:5em 1fr 2.5em;gap:6px 12px;align-items:center;margin:8px 0;font-size:.9rem}
+.mark{font-weight:700;font-size:1.2rem}
+.mark.ok{color:var(--ok)} .mark.ng{color:var(--bad)}
+.big{font-size:2rem;font-weight:700;color:var(--accent)}
+@media (max-width:620px){
+  body{font-size:18px}
+  .ebody{grid-template-columns:1fr}
+  .etree{border-right:0;border-bottom:1px solid #d6d9dc;max-height:200px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+"use strict";
+
+/* ================= 問題データ ================= */
+/* 問1：ウェブページ。01と02は公表資料どおり。03〜06は授業用に作成した文章（公表資料に掲載がないため）。 */
+var PAGES = {
+  "01":{title:"さまざまな環境問題",
+    paras:["わたしたちの地球は現在さまざまな環境問題をかかえています。具体的にどんな環境問題があるか見てみましょう。"],
+    links:[["02","オゾン層の破壊"],["03","酸性雨"],["04","地球温暖化"],["05","砂漠化"],["06","熱帯林の減少"]]},
+  "02":{title:"さまざまな環境問題", sub:"オゾン層の破壊", paras:[
+    "オゾン層とは、成層圏にあるオゾンの濃度が高い層を指します。オゾン層は生物にとって有害な紫外線を防ぐ働きを持ちます。このオゾン層が、人類が生産したフロンガスという化学物質によって破壊されています。フロンガスは冷蔵庫やクーラーの冷媒（れいばい）として広く使われていました。すでに放出されたフロンガスによってオゾン層は大きく破壊されています。特に、南極大陸の上空ではオゾンの濃度が低くなり、オゾン層に穴が空いたような状態になっています。フロンガスによってオゾン層が破壊されると、地表に降りそそぐ紫外線の量が増えて、皮膚（ひふ）がんにかかる人が増えると言われています。",
+    "現在ではオゾン層破壊を防ぐためにフロンガスの使用は規制されています。また、フロンガスは温室効果ガスでもあり、地球温暖化を防ぐためにもフロンガスの規制は重要です。"]},
+  "03":{title:"さまざまな環境問題", sub:"酸性雨", paras:[
+    "酸性雨とは、pH5.6以下の雨をいいます。工場や自動車などから出る硫黄酸化物や窒素酸化物が、大気中で雨にとけこむことで起こります。酸性雨は、森林をからしたり、湖や川にすむ生き物に影響をあたえたり、建物や像をいためたりします。"]},
+  "04":{title:"さまざまな環境問題", sub:"地球温暖化", paras:[
+    "地球温暖化とは、地球全体の平均気温が上がる現象です。二酸化炭素などの温室効果ガスが増えることが主な原因です。気温が上がると、氷がとけたり海水がふくらんだりして、海面が上昇します。また、異常気象が増えると言われています。"]},
+  "05":{title:"さまざまな環境問題", sub:"砂漠化", paras:[
+    "砂漠化とは、土地がやせて、植物が育たなくなっていく現象です。主な原因は、長く雨が降らない干ばつなどの気候の変化と、家畜の飼いすぎ、畑のつくりすぎ、木の切りすぎといった人間の活動です。"]},
+  "06":{title:"さまざまな環境問題", sub:"熱帯林の減少", paras:[
+    "熱帯林は、赤道付近の暑くて雨の多い地域に広がる森林です。主な原因は、農地や牧場をつくるための開発、木材をとるための伐採、焼畑農業などです。熱帯林が減ると、そこにすむ生き物が減り、二酸化炭素を吸収する量も少なくなります。"]}
+};
+
+/* 問3：フォルダ構成。「デスクトップ」直下の4フォルダは公表資料どおり。その中身は授業用に作成。 */
+var FS = {id:"desk", name:"デスクトップ", kids:[
+  {id:"doc", name:"書類", kids:[{id:"doc-letter", name:"手紙"},{id:"doc-home", name:"宿題"}]},
+  {id:"photo", name:"写真", kids:[{id:"photo-sports", name:"運動会"},{id:"photo-trip", name:"旅行"},{id:"photo-event", name:"学校行事"}]},
+  {id:"movie", name:"動画", kids:[{id:"movie-trip", name:"旅行"},{id:"movie-sports", name:"運動会"}]},
+  {id:"music", name:"音楽", kids:[{id:"music-fav", name:"お気に入り"}]}
+]};
+var FSMAP = {};
+(function index(n, parent){ FSMAP[n.id]={node:n, parent:parent}; (n.kids||[]).forEach(function(k){ index(k,n.id); }); })(FS, null);
+function fsPath(id){ var out=[]; while(id){ out.unshift(FSMAP[id].node.name); id=FSMAP[id].parent; } return out.join(" ＞ "); }
+
+var CARDS = [
+  {id:"c1", label:"明るさセンサーが光る"},
+  {id:"c2", label:"明るさセンサーが消える"},
+  {id:"c3", label:"ライトが光る"},
+  {id:"c4", label:"ライトが消える"}
+];
+
+var ITEMS = [
+  { id:"q1", type:"web", label:"環境問題",
+    prompt:"浩二さんが環境問題について調べたところ、下のウェブページを見つけました。このウェブページに書かれている内容として最も適切なものを、1つ選んでください。リンクをタップ（クリック）すると、ほかのページを読めます。",
+    options:[
+      {id:"1", label:"1　フロンガスは地球温暖化をもたらす。"},
+      {id:"2", label:"2　酸性雨はpH5.6以上の雨をいう。"},
+      {id:"3", label:"3　地球温暖化によって海面が上昇し、水の酸性化が進む。"},
+      {id:"4", label:"4　砂漠化の主な原因は、化学物質によるものである。"},
+      {id:"5", label:"5　熱帯林の減少の主な原因は、大気汚染によるものである。"}
+    ],
+    correct:"1",
+    explain:"オゾン層の破壊のページに、フロンガスは温室効果ガスでもあり、地球温暖化に関係すると書かれています。ほかの選択肢は、それぞれのページの内容と合いません。複数のページを読み比べて、書かれていることだけを根拠にします。",
+    rate:{all:"52.8%", e:"31.5%", j:"58.4%", h:"73.0%"} },
+
+  { id:"q2", type:"flow", label:"明るさセンサー",
+    prompt:"「明るさセンサー」とは、周りの明るさを測（はか）る機械です。聡太さんは「明るさセンサー」を使って、「周りが暗くなったらライトが光る」というプログラムを作ることにしました。図のＡとＢの空欄に入る言葉としてそれぞれ最も適（てき）したカードを選び、このプログラムを完成させなさい。",
+    correctA:"c3", correctB:"c4",
+    explain:"周りが「暗い」ときにライトが光り、「明るい」ときはライトが消えるようにします。センサーとライトのどちらの動きを書くのかと、分かれ道の向きに注意します。",
+    rate:{all:"56.5%", e:"41.3%", j:"61.5%", h:"69.2%"} },
+
+  { id:"q3", type:"folder", label:"フォルダ構成",
+    prompt:"下の写真は、旅行の時に撮影（さつえい）した集合写真です。次のフォルダにファイルを保存（ほぞん）したいと思っています。「デスクトップ」の「写真」フォルダ内の「旅行」のフォルダ。右の画面を操作して、保存先のフォルダを開きなさい。指示どおりのフォルダを開いたら、「進む」を押してください。",
+    correct:"photo-trip",
+    explain:"「デスクトップ」の中の「写真」を開き、その中の「旅行」を開きます。フォルダの名前だけでなく、どこにあるフォルダかを手がかりにします。",
+    rate:{all:"69.8%", e:"51.5%", j:"76.1%", h:"83.5%"} }
+];
+
+var PASSAGE = "学校では、タブレットを使って調べ学習をする機会が増えました。インターネットで集めた情報は、正しいかどうかを確かめてから使うことが大切です。わからない言葉は辞書や図鑑でも調べ、友達と意見を交換しながら考えを深めていきます。まとめた内容は、図や表を入れて、読む人に分かりやすく伝えましょう。作品には作った人の権利があるので、他の人の文章や写真を使うときは出典を書き、きまりを守ります。毎日少しずつ練習すると、キーボードで文字を入力する速さも自然に上がっていきます。落ち着いて、ていねいに入力してみましょう。";
+
+/* ================= 状態 ================= */
+var S = {
+  cur:0, sent:{}, answers:{},
+  sel:null,            // 問1の選択
+  page:"01",
+  pick:null, slots:{A:null,B:null},   // 問2
+  open:"desk", exp:{desk:true},       // 問3
+  ty:{state:"idle", typed:"", count:0, good:0}
+};
+var tyTimer = null, tyEnd = 0, dragCard = null;
+var N = ITEMS.length;        // 問の数
+var TY = N;                  // 「入力」タブの番号
+var RS = N + 1;              // 「結果」タブの番号
+
+/* ================= ヘルパー ================= */
+function h(tag, props){
+  var el = document.createElement(tag), p = props || {};
+  Object.keys(p).forEach(function(k){
+    var v = p[k];
+    if(k==="class") el.className = v;
+    else if(k.indexOf("on")===0) el.addEventListener(k.slice(2), v);
+    else if(k==="disabled") el.disabled = !!v;
+    else if(k==="readonly") el.readOnly = !!v;
+    else if(v!==false && v!=null) el.setAttribute(k, v);
+  });
+  for(var i=2;i<arguments.length;i++) add(el, arguments[i]);
+  return el;
+}
+function add(el, kid){
+  if(kid==null || kid===false) return;
+  if(Array.isArray(kid)){ kid.forEach(function(x){ add(el,x); }); return; }
+  el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+}
+var NS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs, text){
+  var e = document.createElementNS(NS, tag);
+  Object.keys(attrs||{}).forEach(function(k){ e.setAttribute(k, attrs[k]); });
+  if(text!=null) e.textContent = text;
+  return e;
+}
+function done(q){ return !!S.sent[q.id]; }
+function isOk(q){
+  var a = S.answers[q.id];
+  if(q.type==="flow") return !!a && a.A===q.correctA && a.B===q.correctB;
+  return a===q.correct;
+}
+function cardLabel(id){ for(var i=0;i<CARDS.length;i++) if(CARDS[i].id===id) return CARDS[i].label; return ""; }
+
+/* ================= 採点 ================= */
+function canSubmit(q){
+  if(done(q)) return false;
+  if(q.type==="web") return !!S.sel;
+  if(q.type==="flow") return !!(S.slots.A && S.slots.B);
+  return true;
+}
+function submit(q){
+  if(!canSubmit(q)) return;
+  if(q.type==="web") S.answers[q.id] = S.sel;
+  else if(q.type==="flow") S.answers[q.id] = {A:S.slots.A, B:S.slots.B};
+  else S.answers[q.id] = S.open;
+  S.sent[q.id] = true;
+  render();
+}
+
+/* ================= 問1 ================= */
+function webBody(q){
+  var pg = PAGES[S.page];
+  var inner;
+  if(S.page==="01"){
+    inner = h("div",{class:"wmain"},
+      pg.paras.map(function(t){ return h("p",null,t); }),
+      h("ul",null, pg.links.map(function(l){
+        return h("li",null, h("button",{class:"wlink",type:"button",onclick:function(){ S.page=l[0]; render(); }}, l[1]));
+      })));
+  } else {
+    inner = h("div",null,
+      h("div",{class:"wmain"}, h("div",{class:"wh2"}, pg.sub), pg.paras.map(function(t){ return h("p",null,t); })),
+      h("button",{class:"wback",type:"button",onclick:function(){ S.page="01"; render(); }},"戻る"));
+  }
+  return h("div",{class:"web"},
+    h("div",{class:"wbar"}, h("span",{class:"nav","aria-hidden":"true"},"◁ ▷"), h("div",{class:"url"},"mochipedia/"+S.page+"/index.html")),
+    h("div",{class:"wbody"}, h("div",{class:"whead"}, pg.title), inner));
+}
+function optionButtons(q){
+  var show = done(q);
+  return h("div",{class:"opts"}, q.options.map(function(o){
+    var cls = "opt";
+    if(show && o.id===q.correct) cls += " right";
+    else if(show && S.answers[q.id]===o.id) cls += " wrong";
+    return h("button",{class:cls,type:"button","aria-pressed":S.sel===o.id,disabled:show,
+      onclick:function(){ if(done(q)) return; S.sel=o.id; render(); }},
+      o.label + (show && o.id===q.correct ? "　✓" : ""));
+  }));
+}
+
+/* ================= 問2 ================= */
+function place(card, key){
+  if(done(ITEMS[1])) return;
+  ["A","B"].forEach(function(k){ if(S.slots[k]===card) S.slots[k]=null; });
+  S.slots[key] = card; S.pick = null; render();
+}
+function slotClick(key){
+  if(done(ITEMS[1])) return;
+  if(S.pick) place(S.pick, key);
+  else if(S.slots[key]){ S.slots[key]=null; render(); }
+}
+function flowBody(q){
+  var show = done(q);
+  var svg = sv("svg",{viewBox:"0 0 580 430","class":"fsvg",role:"group","aria-label":"プログラムのフローチャート"});
+  var defs = sv("defs"), mk = sv("marker",{id:"ah",viewBox:"0 0 10 10",refX:"8",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"});
+  mk.append(sv("path",{d:"M2 1L8 5L2 9",style:"fill:none;stroke:var(--fg);stroke-width:1.6"}));
+  defs.append(mk); svg.append(defs);
+  function line(pts, arrow){ var l = sv("polyline",{points:pts,"class":"ln"}); if(arrow) l.setAttribute("marker-end","url(#ah)"); svg.append(l); }
+  function txt(x,y,t,cls,anchor){ svg.append(sv("text",{x:x,y:y,"text-anchor":anchor||"middle","class":cls||""},t)); }
+  line("480,348 480,400 24,400 24,72 238,72", true);
+  line("240,348 240,400", false);
+  svg.append(sv("rect",{x:170,y:8,width:140,height:44,rx:22,"class":"shape"}));
+  txt(240,38,"スタート");
+  line("240,52 240,92", true);
+  svg.append(sv("polygon",{points:"240,92 390,152 240,212 90,152","class":"shape"}));
+  txt(240,146,"明るさセンサーが"); txt(240,172,"周りの明るさを感知");
+  line("240,212 240,288", true); txt(252,256,"暗い","lbl","start");
+  line("390,152 480,152 480,288", true); txt(492,236,"明るい","lbl","start");
+  [["A",240,145],["B",480,385]].forEach(function(s){
+    var key = s[0], cx = s[1], x = s[2], c = S.slots[key];
+    var cls = "slot" + (c ? " put" : "");
+    if(show) cls += (c === (key==="A" ? q.correctA : q.correctB)) ? " ok" : " ng";
+    var g = sv("g",{"class":cls,role:"button",tabindex:"0","aria-label":"空欄"+key+(c ? "："+cardLabel(c) : "")});
+    g.append(sv("rect",{x:x,y:290,width:190,height:58,rx:6}));
+    var label = c ? cardLabel(c) : key;
+    var tx = sv("text",{x:cx,y:326,"text-anchor":"middle"}, label);
+    if(label.length*20 > 172){ tx.setAttribute("textLength","172"); tx.setAttribute("lengthAdjust","spacingAndGlyphs"); }
+    g.append(tx);
+    g.addEventListener("click", function(){ slotClick(key); });
+    g.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); slotClick(key); } });
+    g.addEventListener("dragover", function(e){ e.preventDefault(); });
+    g.addEventListener("drop", function(e){ e.preventDefault(); if(dragCard) place(dragCard, key); dragCard = null; });
+    svg.append(g);
+  });
+  var used = {}; used[S.slots.A]=1; used[S.slots.B]=1;
+  var pool = h("div",{class:"cards"}, CARDS.map(function(c){
+    var b = h("button",{class:"cardbtn"+(used[c.id]?" used":""),type:"button","aria-pressed":S.pick===c.id,disabled:show,
+      draggable: show ? "false" : "true",
+      onclick:function(){ if(done(q)) return; S.pick = (S.pick===c.id) ? null : c.id; render(); }}, c.label);
+    b.addEventListener("dragstart", function(e){ dragCard = c.id; try{ e.dataTransfer.setData("text/plain", c.id); }catch(x){} });
+    return b;
+  }));
+  return h("div",null, svg,
+    h("p",{class:"note"},"使い方：カードを選んでから空欄（A・B）をタップ（クリック）。パソコンではドラッグでも入れられます。入れたカードをもう一度タップすると戻せます。"),
+    pool);
+}
+
+/* ================= 問3 ================= */
+function openFolder(id){ if(done(ITEMS[2])) return; S.open = id; var p=id; while(p){ S.exp[p]=true; p=FSMAP[p].parent; } render(); }
+function folderBody(q){
+  var show = done(q);
+  function row(n, depth){
+    var has = !!(n.kids && n.kids.length);
+    var r = h("div",{class:"erow",style:"padding-left:"+(depth*16)+"px"},
+      has ? h("button",{class:"echev",type:"button","aria-label":(S.exp[n.id]?"閉じる":"開く"),disabled:show,
+        onclick:function(){ S.exp[n.id]=!S.exp[n.id]; render(); }}, S.exp[n.id] ? "∨" : "＞") : h("span",{style:"width:28px;display:inline-block"}),
+      h("button",{class:"efolder"+(S.open===n.id?" cur":""),type:"button",disabled:show,onclick:function(){ openFolder(n.id); }}, "📁 "+n.name));
+    var out = [r];
+    if(has && S.exp[n.id]) n.kids.forEach(function(k){ out = out.concat(row(k, depth+1)); });
+    return out;
+  }
+  var cur = FSMAP[S.open].node;
+  var pane = h("div",{class:"epane"}, (cur.kids||[]).map(function(k){
+    return h("button",{class:"eicon",type:"button",disabled:show,onclick:function(){ openFolder(k.id); }}, h("span",null,"📁"), k.name);
+  }));
+  if(!(cur.kids && cur.kids.length)) pane.append(h("p",{class:"note"},"このフォルダには、ほかのフォルダはありません。"));
+  var parent = FSMAP[S.open].parent;
+  return h("div",null,
+    h("div",{class:"photo"},"（旅行の時に撮影した集合写真）"),
+    h("div",{class:"explorer"},
+      h("div",{class:"etitle"}, cur.name),
+      h("div",{class:"eaddr"},
+        h("button",{class:"eup",type:"button",disabled:show||!parent,onclick:function(){ if(parent) openFolder(parent); }},"↑ 上へ"),
+        h("div",{class:"path"}, fsPath(S.open))),
+      h("div",{class:"ebody"}, h("div",{class:"etree"}, row(FS,0)), pane)));
+}
+
+/* ================= 入力（1分間） ================= */
+function lcs(a, b){
+  var n=a.length, m=b.length, prev=new Array(m+1).fill(0), cur;
+  for(var i=1;i<=n;i++){
+    cur = new Array(m+1).fill(0);
+    for(var j=1;j<=m;j++) cur[j] = a[i-1]===b[j-1] ? prev[j-1]+1 : Math.max(prev[j], cur[j-1]);
+    prev = cur;
+  }
+  return prev[m];
+}
+function norm(s){ return s.replace(/\s/g,""); }
+function startTyping(){
+  S.ty = {state:"run", typed:"", count:0, good:0};
+  tyEnd = Date.now() + 60000;
+  render();
+  var ta = document.getElementById("tyin"); if(ta) ta.focus();
+  clearInterval(tyTimer);
+  tyTimer = setInterval(function(){
+    var left = Math.max(0, Math.ceil((tyEnd - Date.now())/1000));
+    var t = document.getElementById("tmr"); if(t) t.textContent = "残り " + left + " 秒";
+    if(left<=0) finishTyping();
+  }, 200);
+}
+function finishTyping(){
+  clearInterval(tyTimer);
+  var ta = document.getElementById("tyin");
+  if(ta){ ta.readOnly = true; ta.blur(); }
+  setTimeout(function(){
+    var typed = norm(ta ? ta.value : "");
+    var target = norm(PASSAGE);
+    S.ty = {state:"done", typed:typed, count:typed.length, good:lcs(typed, target)};
+    render();
+  }, 120);
+}
+function typingView(){
+  var t = S.ty;
+  var card = h("div",{class:"card"},
+    h("p",{class:"qno"},"体験　キーボード入力（1分間）", h("span",{class:"tag"},"採点なし")),
+    h("p",{class:"prompt"},"下の文章を、できるだけ速く、正確に入力してください。"),
+    h("div",{class:"passage"}, PASSAGE));
+  if(t.state==="idle"){
+    card.append(h("p",{class:"note"},"「スタート」を押すと1分間の計測が始まります。パソコンのキーボードでもスマホでも入力できます。"),
+      h("button",{class:"go",type:"button",onclick:startTyping},"スタート"));
+  } else if(t.state==="run"){
+    card.append(h("div",{class:"timer",id:"tmr","aria-live":"off"},"残り 60 秒"),
+      h("textarea",{class:"tyin",id:"tyin",rows:"5",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false",lang:"ja","aria-label":"入力欄"}));
+  } else {
+    var tr = function(a,b,c){ return h("tr",null,h("td",null,a),h("td",null,b),h("td",null,c)); };
+    card.append(
+      h("div",null, h("span",{class:"big"}, t.count+" 文字"), "　1分間に入力した文字数"),
+      h("div",null, h("span",{class:"big"}, t.good+" 文字"), "　そのうち、文章と合っていた文字数（目安）"),
+      h("table",{class:"nat"},
+        h("tr",null,h("th",null,"全国調査の平均（1分間あたり）"),h("th",null,"小5"),h("th",null,"中2"),h("th",null,"高2")),
+        tr("文字数","15.8","23.0","28.4")),
+      h("p",{class:"note"},"全国調査（令和3年度）は、3分間の入力課題を1分間あたりに直した値で、パソコンのキーボード入力です。スマホのフリック入力などでは、速さが変わります。"),
+      h("button",{class:"ghost",type:"button",onclick:function(){ S.ty={state:"idle",typed:"",count:0,good:0}; render(); }},"もう一度やってみる"));
+  }
+  return card;
+}
+
+/* ================= 画面 ================= */
+function nav(){
+  var running = S.ty.state==="run";
+  var btns = ITEMS.map(function(it,i){
+    return h("button",{class:"pbtn"+(done(it)?" done":""),type:"button","aria-current":S.cur===i,disabled:running,
+      onclick:function(){ S.cur=i; render(); }}, "問"+(i+1));
+  });
+  btns.push(h("button",{class:"pbtn"+(S.ty.state==="done"?" done":""),type:"button","aria-current":S.cur===TY,disabled:running,
+    onclick:function(){ S.cur=TY; render(); }}, "入力"));
+  btns.push(h("button",{class:"pbtn",type:"button","aria-current":S.cur===RS,disabled:running,
+    onclick:function(){ S.cur=RS; render(); }}, "結果"));
+  return h("div",{class:"progress"}, btns);
+}
+function rateTable(q){
+  var r = q.rate, tr = function(a,b,c,d){ return h("td",null,a); };
+  return h("table",{class:"nat"},
+    h("tr",null,h("th",null,"全国調査の正答率"),h("th",null,"全体"),h("th",null,"小学生"),h("th",null,"中学生"),h("th",null,"高校生")),
+    h("tr",null,h("td",null,"問"+(ITEMS.indexOf(q)+1)),h("td",null,r.all),h("td",null,r.e),h("td",null,r.j),h("td",null,r.h)));
+}
+function quizView(){
+  var idx = S.cur, q = ITEMS[idx], show = done(q);
+  var body, extra = null;
+  if(q.type==="web"){ body = [webBody(q), optionButtons(q)]; }
+  else if(q.type==="flow"){ body = [flowBody(q)]; }
+  else { body = [folderBody(q)]; }
+  var card = h("div",{class:"card"},
+    h("p",{class:"qno"}, "問"+(idx+1)+"／"+N+"　"+q.label),
+    h("p",{class:"prompt"}, q.prompt),
+    body,
+    show ? null : h("div",null,
+      h("button",{class:"go",type:"button",disabled:!canSubmit(q),onclick:function(){ submit(q); }}, q.type==="folder" ? "進む（採点する）" : "この答えで採点する")));
+  if(show){
+    var ok = isOk(q);
+    card.append(h("div",{class:"fb "+(ok?"ok":"ng")}, h("b",null, ok ? "正解です。" : "ちがいます。"), " ", q.explain), rateTable(q));
+  }
+  var next = h("div",{class:"ctrl"},
+    idx>0 ? h("button",{class:"ghost",type:"button",onclick:function(){ S.cur=idx-1; render(); }},"← 前へ") : null,
+    h("button",{class:"ghost",type:"button",onclick:function(){ S.cur=idx+1; render(); }}, idx<N-1 ? "次の問題 →" : "入力の体験へ →"));
+  return h("div",null, nav(), card, next);
+}
+function resultView(){
+  var right = 0;
+  var rows = ITEMS.map(function(q,i){
+    var d = done(q), ok = d && isOk(q);
+    if(ok) right++;
+    return [h("div",null,"問"+(i+1)), h("div",null,q.label),
+      h("div",{class:"mark "+(!d?"":ok?"ok":"ng"),"aria-label":!d?"未回答":ok?"正解":"不正解"}, !d?"－":ok?"○":"×")];
+  });
+  var t = S.ty;
+  return h("div",null, nav(),
+    h("div",{class:"card"},
+      h("p",{class:"qno"},"結果"),
+      h("div",null, h("span",{class:"big"}, right+" ／ "+N), "　問 正解"),
+      h("div",{class:"res"}, rows),
+      t.state==="done" ? h("p",null,"入力の体験：1分間に "+t.count+" 文字（文章と合っていた文字数 "+t.good+" 文字）") : null,
+      h("p",{class:"note"},"この結果は、この画面の中だけで採点されています。先生の呼びかけに合わせて、手を挙げて答えてください。"),
+      h("button",{class:"ghost",type:"button",onclick:function(){
+        S.cur=0; S.sent={}; S.answers={}; S.sel=null; S.page="01"; S.pick=null; S.slots={A:null,B:null};
+        S.open="desk"; S.exp={desk:true}; S.ty={state:"idle",typed:"",count:0,good:0}; render(); }},"最初からやり直す")));
+}
+function render(){
+  var app = document.getElementById("app");
+  var main = S.cur<N ? quizView() : S.cur===TY ? h("div",null, nav(), typingView(), h("div",{class:"ctrl"},
+      h("button",{class:"ghost",type:"button",disabled:S.ty.state==="run",onclick:function(){ S.cur=N-1; render(); }},"← 前へ"),
+      h("button",{class:"ghost",type:"button",disabled:S.ty.state==="run",onclick:function(){ S.cur=RS; render(); }},"結果を見る →"))) : resultView();
+  app.replaceChildren(
+    h("h1",null,"情報活用能力 体験問題"),
+    h("p",{class:"sub"},"教育工学 第6回　個人で取り組む"),
+    main,
+    h("p",{class:"note"},"出典：文部科学省「情報活用能力調査（令和3年度実施）速報結果」（令和4年12月）調査問題例1〜3をもとに作成。実際の調査はコンピュータで実施され、児童生徒ごとに異なる問題セットが出題されたため、正答率は全児童生徒のものではありません。一部のページ・フォルダの内容と、入力課題の文章は、授業用に作成しました。"));
+}
+render();
+})();
+</script>
+</body>
+</html>
